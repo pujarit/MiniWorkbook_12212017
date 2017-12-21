@@ -1,0 +1,230 @@
+<html><head></head>
+<body ng-controller="workbookcontroller" ng-init="fn_GetListMIDAS();" style="word-wrap: break-word;">?
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Mini Workbook</title>
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Angular JS -->
+    <script src="js/angular.min.js" type="text/javascript"></script>
+    <!-- Workbook JS -->
+    <script src="js/workbook.js"></script>
+    <script src="../Scripts/Common/XrmServiceToolkit.js"></script>
+    <style>
+        #page-wrapper {
+            margin: 0 !important;
+        }
+
+        .ArrowSign {
+            cursor: pointer;
+        }
+
+        .nav > li > a {
+            padding: 9px 10px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .table > thead > tr > th {
+            padding: 3px 10px;
+            font-weight: bold;
+            text-align: left;
+            border: 0.5px solid #ddd;
+        }
+
+        .table > tbody > tr > td {
+            text-align: left;
+            padding: 2px 10px;
+            font-size: small;
+            border: 0.5px solid #ddd;
+        }
+
+        .label {
+            padding: 9px 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .i {
+            border: solid black;
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 3px;
+        }
+
+        .up {
+            transform: rotate(-135deg);
+            -webkit-transform: rotate(-135deg);
+        }
+
+        .down {
+            transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+        }
+    </style>
+
+
+
+    <div id="wrapper">
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#midastab" data-toggle="tab" ng-click="fn_SetTablename(1)">MIDAS</a>
+                        </li>
+                        <li>
+                            <a href="#ffmextracttab" data-toggle="tab" ng-click="fn_SetTablename(2)">FFM EXTRACT</a>
+                        </li>
+                        <li>
+                            <a href="#rcnotab" data-toggle="tab" ng-click="fn_SetTablename(3)">RCNO</a>
+                        </li>
+						<!-- NEED A PROCESSING BAR FOR THIS LINK AS WELL -->
+                        <a href="#" class="active" style="float: right;padding-top: 10px;padding-right: 10px; font-weight:bold;">Generate Full Workbook</a>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="midasTab">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body" ng-if="noMidasDataFlag">
+                                            <label class="label label-success">NO MIDAS DATA FOUND</label>
+                                        </div>
+										<div class="panel-body" ng-if="MidasErrorFlag">
+                                            <label class="label label-danger">{{MidasErrorMsg}}</label>
+                                        </div>
+                                        <div ng-if="!noMidasDataFlag &amp;&amp; !MidasErrorFlag">
+                                            <table class="table table-striped table-bordered table-hover" id="MIDAS">
+                                                <thead>
+                                                    <tr>
+                                                        <th ng-click="changeSorting(Application_ID)" class="ArrowSign">APPID</th>
+                                                        <th ng-click="changeSorting(Policy_Number)" class="ArrowSign">POLICY</th>
+                                                        <th ng-click="changeSorting(PLCY_STRT_DT)" class="ArrowSign">STARTDATE</th>
+                                                        <th ng-click="changeSorting(PLCY_TRMNTN_DT)" class="ArrowSign">ENDDATE</th>
+                                                        <th ng-click="changeSorting(RCPNT_1ST_NAME)" class="ArrowSign">FIRST</th>
+                                                        <th ng-click="changeSorting(RCPNT_LAST_NAME)" class="ArrowSign">LAST</th>
+                                                        <th ng-click="changeSorting(ANN_APTC_AMT)" class="ArrowSign">APTC</th>
+                                                        <th ng-click="changeSorting(ANN_PLCY_PRM_AMT)" class="ArrowSign">PREMIUM</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in MIDAS|orderBy:sort.column:sort.descending">
+                                                        <td>{{item.Application_ID}}</td>
+                                                        <td>{{item.Policy_Number}}</td>
+                                                        <td>{{item.PLCY_STRT_DT| dateconversion }}</td>
+                                                        <td>{{item.PLCY_TRMNTN_DT| dateconversion}}</td>
+                                                        <td>{{item.RCPNT_1ST_NAME}}</td>
+                                                        <td>{{item.RCPNT_LAST_NAME}}</td>
+                                                        <td>{{item.ANN_APTC_AMT| currency: "$" : 2}}</td>
+                                                        <td>{{item.ANN_PLCY_PRM_AMT| currency: "$" : 2}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="ffmExtractTab">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body" ng-if="noFfmDataFlag">
+                                            <label class="label label-success">NO FFM EXTRACT DATA FOUND</label>
+                                        </div>
+										<div class="panel-body" ng-if="FfmErrorFlag">
+                                            <label class="label label-danger">{{FfmErrorMsg}}</label>
+                                        </div>
+                                        <div ng-if="!noFfmDataFlag &amp;&amp; !FfmErrorFlag">                                        
+                                            <table class="table table-striped table-bordered table-hover" id="FFMEXTRACT">
+                                                <thead>
+                                                    <tr>
+                                                        <th ng-click="changeSorting(ApplicationID)" class="ArrowSign">APPID</th>
+                                                        <th ng-click="changeSorting(PLAN_EXCHG_ASGNED_PLCY_NUM)" class="ArrowSign">POLICY</th>
+                                                        <th ng-click="changeSorting(PLAN_BNFT_STRT_DT)" class="ArrowSign">STARTDATE</th>
+                                                        <th ng-click="changeSorting(PLAN_BNFT_END_DT)" class="ArrowSign">ENDDATE</th>
+                                                        <th ng-click="changeSorting(PRSN_1ST_NAME)" class="ArrowSign">FIRST</th>
+                                                        <th ng-click="changeSorting(PRSN_LAST_NAME)" class="ArrowSign">LAST</th>
+                                                        <th ng-click="changeSorting(PLCY_APTC_AMT)" class="ArrowSign">APTC</th>
+                                                        <th ng-click="changeSorting(PLCY_TOT_PRM_AMT)" class="ArrowSign">PREMIUM</th>
+                                                        <th ng-click="changeSorting(QHPID_LKP_KEY)" class="ArrowSign">QHPID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="fitem in FFMS|orderBy:sort.column:sort.descending">
+                                                        <td>{{fitem.ApplicationID}}</td>
+                                                        <td>{{fitem.PLAN_EXCHG_ASGNED_PLCY_NUM}}</td>
+                                                        <td>{{fitem.PLAN_BNFT_STRT_DT| dateconversion}}</td>
+                                                        <td>{{fitem.PLAN_BNFT_END_DT| dateconversion}}</td>
+                                                        <td>{{fitem.PRSN_1ST_NAME}}</td>
+                                                        <td>{{fitem.PRSN_LAST_NAME}}</td>
+                                                        <td>{{fitem.PLCY_APTC_AMT| currency: "$" : 2}}</td>
+                                                        <td>{{fitem.PLCY_TOT_PRM_AMT| currency: "$" : 2}}</td>
+                                                        <td>{{fitem.QHPID_LKP_KEY}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="rcnoTab">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body" ng-if="noRcnoDataFlag">
+                                            <label class="label label-success">NO RCNO DATA FOUND</label>
+                                        </div>
+										<div class="panel-body" ng-if="RcnoErrorFlag">
+                                            <label class="label label-danger">{{RcnoErrorMsg}}</label>
+                                        </div>
+                                        <div ng-if="!noRcnoDataFlag &amp;&amp; !RcnoErrorFlag">
+                                            <table class="table table-striped table-bordered table-hover" id="RCNO">
+                                                <thead>
+                                                    <tr>
+                                                        <!-- <th ng-click="changeSorting(ApplicationID)" class="ArrowSign">APPID</th> -->
+                                                        <th ng-click="changeSorting(FFM_PLAN_EXCHG_ASG_PLCY_NUM)" class="ArrowSign">POLICY</th>
+                                                        <th ng-click="changeSorting(FFM_PLAN_BNFT_STRT_DT)" class="ArrowSign">STARTDATE</th>
+                                                        <th ng-click="changeSorting(FFM_PLAN_BNFT_END_DT)" class="ArrowSign">ENDDATE</th>
+                                                        <th ng-click="changeSorting(FFM_PRSN_1ST_NAME)" class="ArrowSign">FIRST</th>
+                                                        <th ng-click="changeSorting(FFM_PRSN_LAST_NAME)" class="ArrowSign">LAST</th>
+                                                        <th ng-click="changeSorting(FFM_PLCY_APTC_AMT)" class="ArrowSign">APTC</th>
+                                                        <th ng-click="changeSorting(FFM_PLCY_TOT_PRM_AMT)" class="ArrowSign">PREMIUM</th>
+                                                        <th ng-click="changeSorting(BATCH_ID)" class="ArrowSign">BATCHID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="ritem in RCNO|orderBy:sort.column:sort.descending">
+                                                        <!-- <td>{{ritem.ApplicationID}}</td> -->
+                                                        <td>{{ritem.FFM_PLAN_EXCHG_ASG_PLCY_NUM}}</td>
+                                                        <td>{{ritem.FFM_PLAN_BNFT_STRT_DT| dateconversion}}</td>
+                                                        <td>{{ritem.FFM_PLAN_BNFT_END_DT| dateconversion}}</td>
+                                                        <td>{{ritem.FFM_PRSN_1ST_NAME}}</td>
+                                                        <td>{{ritem.FFM_PRSN_LAST_NAME}}</td>
+                                                        <td>{{ritem.FFM_PLCY_APTC_AMT| currency: "$" : 2}}</td>
+                                                        <td>{{ritem.FFM_PLCY_TOT_PRM_AMT| currency: "$" : 2}}</td>
+                                                        <td>{{ritem.BATCH_ID}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body></html>
