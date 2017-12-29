@@ -1,24 +1,9 @@
-/*function getMvc6ServiceBaseUrl() {
-    var baseUrl;    
-    XrmServiceToolkit.Rest.RetrieveMultiple("cog_cogsettingSet", "$select=cog_stringvalue&$filter=cog_name eq 'Mvc6ServiceBaseUrl' ", 
-	function (results) {
-        baseUrl = results[0].cog_stringvalue;
-    },
-    function (error) {
-        console.log(error);
-    },
-    function onComplete() {
-    },
-    false);
-   // console.log("MVC6 Base Url = " + baseUrl);
-    return baseUrl;
-}*/
-
-//var caseId = window.parent.Xrm.Page.getAttribute('cog_hicscaseid').getValue();
-var caseId = 'N0003000069'
+//var caseId = 'E1706170812';
+var caseId = 'N0003000069';
 
 function getServiceUrl(datasource) {
-	var serviceURL = 'https://mcr-cc.test.cognosante.cc:443';
+	var serviceURL = "https://mcr-cc.test.cognosante.cc:443";
+	//var serviceURL = "https://cerrs-mcr.cms.gov";	
 	var midasServicePath = '/database/v1/consumer/get-hics-miniworkbook-midas-data';
     var ffmServicePath = '/database/v1/consumer/get-hics-miniworkbook-ffm-data';
     var rcnoServicePath = '/database/v1/consumer/get-hics-miniworkbook-rcno-data';			    
@@ -122,9 +107,11 @@ app.controller("workbookcontroller", function ($scope, Service) {
 
     $scope.fn_GetListMIDAS = function () {
 		console.log('Inside MIDAS');
+		$scope.ShowLoadingMsg = true;
         var ResponseRegistration = Service.GetListMIDAS();
         ResponseRegistration.then(function (msg) {
             $scope.MIDAS = msg.data.WorkbookResultSet;
+			$scope.ShowLoadingMsg = false;
             if($scope.MIDAS.length < 1){
                 //console.log('NO DATA FOUND');
                 $scope.noMidasDataFlag = true;
@@ -132,16 +119,19 @@ app.controller("workbookcontroller", function ($scope, Service) {
         }, function (msg) {  			
 			if(msg.status > 1 || msg.status== -1){
 			$scope.MidasErrorFlag = true;	
-			$scope.MidasErrorMsg = "ERROR RETRIEVING MIDAS DATA. ERROR CODE : " + msg.status}			
+			$scope.ShowLoadingMsg = false;
+			$scope.MidasErrorMsg = "ERROR RETRIEVING MIDAS DATA"}			
             console.log("ERROR IN MIDAS TAB:", msg);
         });
     }
     
     function fn_GetListFFm(){
 		console.log('Inside FFM');
+		$scope.ShowLoadingMsg = true;
         var ResponseRegistration = Service.GetListFFM();
         ResponseRegistration.then(function (msg) {
             $scope.FFMS = msg.data.WorkbookResultSet;
+			$scope.ShowLoadingMsg = false;
             $scope.TableName = "FFMEXTRACT";
             if($scope.FFMS.length < 1){
 				//console.log('NO DATA FOUND');
@@ -150,16 +140,19 @@ app.controller("workbookcontroller", function ($scope, Service) {
         }, function (msg) {     
 			if(msg.status > 1 || msg.status== -1){
 			$scope.FfmErrorFlag = true;	
-			$scope.FfmErrorMsg = "ERROR RETRIEVING FFM DATA. ERROR CODE : " + msg.status}			
+			$scope.ShowLoadingMsg = false;
+			$scope.FfmErrorMsg = "ERROR RETRIEVING FFM DATA"}			
             console.log("ERROR IN FFM TAB:", msg);
         });
     }
     
     function fn_GetRCNO(){
         console.log('Inside RCNO');
+		$scope.ShowLoadingMsg = true;	
         var ResponseRegistration = Service.GetListRCNO();
         ResponseRegistration.then(function (msg) {
             $scope.RCNO = msg.data.WorkbookResultSet;
+			$scope.ShowLoadingMsg = false;	
 			$scope.TableName = "RCNO";
             if($scope.RCNO.length < 1){
 				//console.log('NO DATA FOUND');
@@ -167,8 +160,9 @@ app.controller("workbookcontroller", function ($scope, Service) {
             }
 }, function (msg) { 	
 			if(msg.status > 1 || msg.status== -1){
-			$scope.RcnoErrorFlag = true;	
-			$scope.RcnoErrorMsg = "ERROR RETRIEVING RCNO DATA. ERROR CODE : " + msg.status}			
+			$scope.RcnoErrorFlag = true;
+			$scope.ShowLoadingMsg = false;			
+			$scope.RcnoErrorMsg = "ERROR RETRIEVING RCNO DATA"}			
             console.log("ERROR IN RCNO TAB:", msg);
         });
     }
