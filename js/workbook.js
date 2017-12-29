@@ -3,7 +3,7 @@ var caseId = 'N0003000069';
 
 function getServiceUrl(datasource) {
 	var serviceURL = "https://mcr-cc.test.cognosante.cc:443";
-	//var serviceURL = "https://cerrs-mcr.cms.gov";	
+	//var serviceURL = "https://impl.cerrs-mcr.cms.gov";	
 	var midasServicePath = '/database/v1/consumer/get-hics-miniworkbook-midas-data';
     var ffmServicePath = '/database/v1/consumer/get-hics-miniworkbook-ffm-data';
     var rcnoServicePath = '/database/v1/consumer/get-hics-miniworkbook-rcno-data';			    
